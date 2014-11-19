@@ -10,6 +10,7 @@
 
 		var fileTransfer = {
 			file: null,
+			debug: false
 		};
 
 		fileTransfer.loadFile = function(file) {
@@ -42,6 +43,10 @@
 				onmessage: function(message) {
 					var data = message.data;
 
+					if (fileTransfer.debug) {
+						console.log(message);
+					}
+
 					if (message.type && messageHandlers.list[message.type]) {
 						var messageHandler = messageHandlers.list[message.type];
 						messageHandler.handler(data, reply(messageHandler.type));
@@ -59,8 +64,6 @@
 					if (!file) {
 						file = fileTransfer.file;
 					}
-
-					console.log('sending file' + file);
 
 					var id = file.name + "-" + utility.randomString();
 					var fileModel = fileList.add(id, file.name, true, file.size);
@@ -609,7 +612,6 @@
 						continueFileSending();
 					}
 					else {
-						console.log(data);
 						console.error("ack without file sender");
 					}
 				}
@@ -619,8 +621,6 @@
 						delete listOfCallbacks[data.slice];
 					}
 					else {
-						console.log(data);
-						console.log(listOfCallbacks);
 						console.error("ack without file sender");
 					}
 				}

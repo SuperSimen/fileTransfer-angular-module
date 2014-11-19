@@ -1,0 +1,16 @@
+{
+  "name": "FileSender",
+  "version": "0.1.0",
+  "authors": [
+    "Simen Owesen-Lein <simen.owesenlein@gmail.com>"
+  ],
+  "main": "fileTransfer.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
