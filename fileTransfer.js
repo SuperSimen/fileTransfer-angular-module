@@ -1,4 +1,5 @@
 (function() {
+
 	var fileTransfer = angular.module('fileTransfer', []);
 
 	fileTransfer.run(function(fileSender, fileReceiver) {
@@ -233,8 +234,6 @@
 					};
 					storage[data.id].slices = [];
 
-
-
 					signalFile(data.id, "sof_ack", data.totalSlices, data.filename);
 				});
 
@@ -402,7 +401,12 @@
 
 
 		function prepareSandbox() {
-			$window.webkitRequestFileSystem(window.TEMPORARY, 0, onInit, errorHandler);
+			if ($window.webkitRequestFileSystem) {
+				$window.webkitRequestFileSystem(window.TEMPORARY, 0, onInit, errorHandler);
+			}
+			else {
+				console.error('Browser does not support file system');
+			}
 
 			function onInit(fs) {
 				function readEntries () {
@@ -432,15 +436,34 @@
 		}
 
 		function initiateFileSystem(id, filename, fileSize, totalSlices, callback) {
-			if (false) {
-				navigator.webkitPersistentStorage.requestQuota(fileSize + 1024*10, function(grantedBytes) {
-					console.log("granted bytes " + grantedBytes);
-					window.webkitRequestFileSystem(window.PERSISTENT, grantedBytes, onInitFs(id, filename, totalSlices, callback), errorHandler);
-				}, errorHandler);
+			if ($window.webkitRequestFileSystem) {
+				$window.webkitRequestFileSystem(window.TEMPORARY, fileSize, onInitFs(id, filename, totalSlices, callback), errorHandler);
 			}
 			else {
-				window.webkitRequestFileSystem(window.TEMPORARY, fileSize, onInitFs(id, filename, totalSlices, callback), errorHandler);
+				sandbox[id] = {
+					blobList: [],
+					appendBlob: function(blob, lastBlob) {
+						this.blobList.push(blob);
+						if (lastBlob) {
+							this.downloadFile();
+						}
+
+					},
+					downloadFile: function() {
+						console.log('downloading file');
+						var blob = new Blob(this.blobList, {type: "application/octet-stream"});
+						var link = document.createElement('a');
+						link.href = window.URL.createObjectURL(blob);
+						link.download = filename;
+						console.log(link);
+						document.body.appendChild(link);
+						link.click();
+						console.log('file downloaded');
+					},
+				};
+				callback();
 			}
+
 		}
 
 		var sandbox = {
@@ -507,7 +530,7 @@
 								fs.root.getFile(filename, {create: false}, function(fileEntry) {
 									fileEntry.file(function(file) {
 										var link = document.createElement('a');
-										link.href = window.URL.createObjectURL(file);
+										link.href = $window.URL.createObjectURL(file);
 										link.download = filenameInput;
 										link.click();
 
@@ -684,7 +707,7 @@
 				reader.onload = function(event) {
 					var buffer = event.target.result;
 
-					var array = btoa(buffer).match(/.{1,51200}/g);
+					var array = btoa(buffer).match(/.{1,10000}/g);
 					if (!progress.sliceSize) progress.sliceSize = array.length;
 
 
