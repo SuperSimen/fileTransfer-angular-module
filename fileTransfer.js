@@ -744,13 +744,11 @@
 			function incrementProgress(status) {
 				if (status === 'sent') {
 					progress.counter++;
-					if (progress.counter % 25 === 0) {
-						var value = progress.calculate();
-						if (value) {
-							$rootScope.$apply(function() {
-								fileList.list[id].progress = value;
-							});
-						}
+					var value = progress.calculate();
+					if (value) {
+						$rootScope.$apply(function() {
+							fileList.list[id].progress = value;
+						});
 					}
 				}
 				else if (status === 'failed') {
