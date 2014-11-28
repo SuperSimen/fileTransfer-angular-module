@@ -21,14 +21,14 @@
 		fileTransfer.newTransfer = function() {
 
 			function reply (type) {
-				return function(data) {
+				return function(data, callback) {
 					var message = {
 						data: data,
 						type: type,
 					};
 
 					if (transfer.sender) {
-						transfer.sender(message);
+						transfer.sender(message, callback);
 					}
 					else {
 						console.error('sender not configured');
@@ -112,6 +112,21 @@
 			element.on('change', function() {
 				fileTransfer.loadFile(element[0].files[0]);
 			});
+		};
+	});
+
+	fileTransfer.directive('ftProgressBar', function () {
+		function link(scope, element, attr) {
+			scope.$watch(function() {return scope.progress;}, function(newValue) {
+				element.css({'width' : newValue + "%"});
+			});
+		}
+
+		return {
+			link: link,
+			scope: {
+				progress: '='
+			}
 		};
 	});
 
@@ -353,7 +368,7 @@
 				totalSlices: totalSlices
 			};
 			if (storage[id].sender) {
-				storage[id].sender.send(tempFile, true);
+				storage[id].sender.send(tempFile);
 			}
 			else {
 				console.error("no sender");
@@ -370,7 +385,7 @@
 				filename: filename
 			};
 			if (storage[id].sender) {
-				storage[id].sender.send(tempFile, true);
+				storage[id].sender.send(tempFile);
 			}
 			else {
 				console.error("no sender");
@@ -450,15 +465,12 @@
 
 					},
 					downloadFile: function() {
-						console.log('downloading file');
 						var blob = new Blob(this.blobList, {type: "application/octet-stream"});
 						var link = document.createElement('a');
 						link.href = window.URL.createObjectURL(blob);
 						link.download = filename;
-						console.log(link);
 						document.body.appendChild(link);
 						link.click();
-						console.log('file downloaded');
 					},
 				};
 				callback();
@@ -532,6 +544,7 @@
 										var link = document.createElement('a');
 										link.href = $window.URL.createObjectURL(file);
 										link.download = filenameInput;
+										document.body.appendChild(link);
 										link.click();
 
 									}, errorHandler);
@@ -728,6 +741,25 @@
 				reader.readAsBinaryString(blob);
 			}
 
+			function incrementProgress(status) {
+				if (status === 'sent') {
+					progress.counter++;
+					if (progress.counter % 25 === 0) {
+						var value = progress.calculate();
+						if (value) {
+							$rootScope.$apply(function() {
+								fileList.list[id].progress = value;
+							});
+						}
+					}
+				}
+				else if (status === 'failed') {
+					fileList.list[id].failed = true;
+				}
+				else {
+					console.error('did not recognize status update');
+				}
+			}
 
 			function sendFileChunk(id, chunk, status, slice, totalSlices, number, totalNumber, filename) {
 				var tempFile = {
@@ -741,14 +773,14 @@
 					slice: slice,
 					totalSlices: totalSlices
 				};
-				sender.send(tempFile);
+				sender.send(tempFile, incrementProgress);
 			}
 
 			function signalCancel(id) {
 				sender.send({
 					id: id,
 					status: "cancel",
-				}, true);
+				});
 			}
 
 			function signalFile(id, status, totalSlices, filename, size) {

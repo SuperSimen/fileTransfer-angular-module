@@ -10,8 +10,12 @@ var transfer = fileTransfer.newTransfer();
 
 Provide fileTransfer with a way to send messages
 ```shell
-transfer.setSender(function(message) {
+transfer.setSender(function(message, callback) {
   //send message somehow
+
+	//use of callback is optional, but necessary to show progress during the transfer
+	callback('sent'); //after message has been sent
+	//callback('failed') if unsuccessfull
 });
 ```
 

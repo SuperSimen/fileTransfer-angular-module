@@ -6,12 +6,21 @@
 
 <body>
 	<script src="../../bower_components/angular/angular.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 
 	<script type="text/javascript" src="app.js"></script>
 	<script type="text/javascript" src="../fileTransfer.js"></script>
 
 	<input type="file" ft-file-uploader/>
 	<button ng-click="sendFile()">Send file</button>
+
+	<div ng-repeat="file in fileList">
+		<div class="progress">
+			<div class="progress-bar" ft-progress-bar progress="file.progress">
+			</div>
+		</div>
+	<div>
+
 </body>
 </html>
 
