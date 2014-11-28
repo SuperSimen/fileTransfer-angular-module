@@ -8,6 +8,7 @@
 			var transfer = fileTransfer.newTransfer();
 
 			transfer.setSender(function(data) {
+				//send file to yourself. Super useful
 				transfer.onmessage(data);
 			});
 
