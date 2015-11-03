@@ -287,8 +287,7 @@
 						var progress = (storage[data.id].counter / (storage[data.id].totalSlices * storage[data.id].sliceSize)) * 100;
 
 						$rootScope.$apply(function() {
-                                                    console.log("updating progress: " + progress);
-							fileList.list[data.id].progress = progress;
+                                                    fileList.list[data.id].progress = progress;
 						});
 					}
 
