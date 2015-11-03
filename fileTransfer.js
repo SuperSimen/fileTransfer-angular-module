@@ -287,6 +287,7 @@
 						var progress = (storage[data.id].counter / (storage[data.id].totalSlices * storage[data.id].sliceSize)) * 100;
 
 						$rootScope.$apply(function() {
+                                                    console.log("updating progress: " + progress);
 							fileList.list[data.id].progress = progress;
 						});
 					}
@@ -746,12 +747,14 @@
 			function incrementProgress(status) {
 				if (status === 'sent') {
 					progress.counter++;
-					var value = progress.calculate();
-					if (value) {
-						$rootScope.$apply(function() {
-							fileList.list[id].progress = value;
-						});
-					}
+                                        if (progress.counter % 25 === 0) {
+                                            var value = progress.calculate();
+                                            if (value) {
+                                                    $rootScope.$apply(function() {
+                                                            fileList.list[id].progress = value;
+                                                    });
+                                            }
+                                        }
 				}
 				else if (status === 'failed') {
 					fileList.list[id].failed = true;
