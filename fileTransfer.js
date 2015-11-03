@@ -70,6 +70,8 @@
 					var fileModel = fileList.add(id, file.name, true, file.size);
 
 					fileSender.sendFile(file, fileModel, reply('fileSender'));
+
+                                        return id;
 				},
 			};
 
